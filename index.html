@@ -1,0 +1,204 @@
+<html lang="en"><head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="refresh" content="3600">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500&amp;display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>รายงานคุณภาพอากาศ</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #FFFDFD;
+      font-family: 'Bai Jamjuree', sans-serif;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 800px;
+    }
+
+    .fontsize1 {
+      font-size: 5.5rem;
+    }
+
+    .fontsize2 {
+      font-size: 8rem;
+      font-weight: bold;
+    }
+
+    .fontsize3 {
+      font-size: 4.5rem;
+    }
+
+    .font-color1 {
+      color: #023256;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div class="row p-2">
+        <div class="col">
+          
+          <br>
+<h2>รายงานคุณภาพอากาศ ประจำวันที่ 11 มกราคม 2568</h2>
+        </div>
+      </div>
+    </header>
+    
+    <section>
+      <div class="row rounded rounded-0 p-2 mb-4" id="pm-widget" style="background-color: rgb(0, 166, 81);">
+    <div class="col-12 col-md-3 text-center">
+      <img src="./aqi_icon/ic-face-green.svg" width="200" alt="yellow-moderate" id="aqi-image" class="bg-white rounded-circle p-3 mt-1">
+    </div>
+    <div class="col-12 col-md-3 text-center text-white">
+      <h2 id="pm-aqi" class="fontsize2">33</h2>
+      <h2 class="fontsize3">AQI</h2>
+    </div>
+    <div class="col-12 col-md text-center text-white">
+      <h2 id="pm-title">คุณภาพอากาศดี</h2>
+      <hr>
+<p id="pm-text" class="fs-5">คุณภาพอากาศดี สามารถทำกิจกรรมกลางแจ้งและท่องเที่ยวได้ตามปกติ</p>
+<span class="badge text-bg-light fs-4" id="pm-25">PM 2.5 | 18 µg/m³</span>
+    </div>
+  </div>
+      <div class="row text-center">
+        <div class="col font-color1">
+          <div class="border rounded rounded-4">
+            <span class="badge text-bg-light fs-4" id="pm-level">PM 2.5 | 18 µg/m³</span>
+<h1 class="fontsize1 rounded-bottom rounded-4" style="background-color:#ebebeb;" id="pm-25">18</h1>
+<h1 class="fontsize1 rounded-bottom rounded-4" style="background-color:#ebebeb;" id="pm-25">99</h1>
+            <h2 class="fs-3">ค่า PM 2.5</h2>
+            <h2 class="fs-5">(ไม่ควรเกิน 37.5 มคก./ลบม.)</h2>
+          </div>
+        </div>
+      </div>
+      
+    </section>
+  </div>
+
+
+
+  <script>
+    function calculateAQI(Ci) {
+      let Cmax, Cmin, Imax, Imin;
+
+      if (Ci >= 0 && Ci <= 15) {
+        Cmin = 0;
+        Cmax = 15;
+        Imax = 25;
+        Imin = 0;
+      } else if (Ci > 15 && Ci <= 25) {
+        Cmin = 15.1;
+        Cmax = 25;
+        Imax = 50;
+        Imin = 26;
+      } else if (Ci > 25 && Ci <= 37.5) {
+        Cmin = 25.1;
+        Cmax = 37.5;
+        Imax = 100;
+        Imin = 51;
+      } else if (Ci > 37.5 && Ci <= 75) {
+        Cmin = 37.6;
+        Cmax = 75;
+        Imax = 200;
+        Imin = 101;
+      } else if (Ci > 75) {
+        Cmin = 75.1;
+        Cmax = 500;
+        Imax = 500;
+        Imin = 201;
+      } else {
+        throw new Error("Invalid PM2.5 concentration value");
+      }
+
+      const AQI = ((Imax - Imin) / (Cmax - Cmin)) * (Ci - Cmin) + Imin;
+      return Math.round(AQI);
+    }
+
+    const aqiUrl = 'https://www.cmuccdc.org/api/ccdc/value/5030';
+
+    const apiaqiKey = 'b059a926-63b8-4527-8ef6-17af89a3399a';
+    const aqicity = 'Mae Sot';
+    fetch(`https://api.airvisual.com/v2/city?city=${aqicity}&state=tak&country=thailand&key=${apiaqiKey}`)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        const aqiTemp = data.data.current.weather.tp;
+        const aqiValueElement = document.getElementById('temp-value');
+        aqiValueElement.textContent = `${aqiTemp} °C`;
+      })
+      .catch(error => console.error(error));
+
+    // temp
+
+
+
+    fetch(aqiUrl)
+      .then(response => response.json())
+      .then(data => {
+        // const pm25 = data.pm25;
+        const aqi = calculateAQI(data.pm25);
+        const rgbValue = data.th_color;
+        const rgb = rgbValue.split(",");
+        // console.log(json)
+        // document.getElementById("pm-level").textContent = `PM2.5 | ${pm25} µg/m³`;
+        document.getElementById("pm-aqi").textContent = `${aqi}`;
+        document.getElementById("pm-10").textContent = `${data.pm10}`;
+        document.getElementById("logtime").textContent = `${data.log_datetime}`;
+        document.getElementById("pm-25").textContent = `${data.pm25}`;
+        document.getElementById("pm-title").textContent = `${data.th_title}`;
+        document.getElementById("pm-text").textContent = `${data.th_caption}`;
+        document.getElementById("pm-widget").style.backgroundColor = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+
+        const aqiImageElement = document.getElementById('aqi-image');
+        // if (aqi > 300) {
+        //   aqiImageElement.src = './aqi_icon/ic-face-maroon.svg';
+        //   aqiImageElement.alt = 'maroon';
+        // } else if (aqi > 200) {
+        //   aqiImageElement.src = './aqi_icon/ic-face-purple.svg';
+        //   aqiImageElement.alt = 'purple';
+        // } else if (aqi > 150) {
+        //   aqiImageElement.src = './aqi_icon/ic-face-red.svg';
+        //   aqiImageElement.alt = 'red';
+        // } else if (aqi > 100) {
+        //   aqiImageElement.src = './aqi_icon/ic-face-orange.svg';
+        //   aqiImageElement.alt = 'orange';
+        // } else if (aqi > 50) {
+        //   aqiImageElement.src = './aqi_icon/ic-face-yellow.svg';
+        //   aqiImageElement.alt = 'yellow';
+        // } else {
+        //   aqiImageElement.src = './aqi_icon/ic-face-green.svg';
+        //   aqiImageElement.alt = 'green-good';
+        // }
+
+        if (aqi >= 0 && aqi <= 25) {
+          aqiImageElement.src = './aqi_icon/ic-face-green.svg';
+          aqiImageElement.alt = 'purple';
+        } else if (aqi > 26 && aqi <= 50) {
+          aqiImageElement.src = './aqi_icon/ic-face-green.svg';
+          aqiImageElement.alt = 'yellow-moderate';
+        } else if (aqi > 51 && aqi <= 100) {
+          aqiImageElement.src = './aqi_icon/ic-face-yellow.svg';
+          aqiImageElement.alt = 'yellow';
+        } else if (aqi > 101 && aqi <= 200) {
+          aqiImageElement.src = './aqi_icon/ic-face-orange.svg';
+          aqiImageElement.alt = 'orange';
+        }  else {
+          aqiImageElement.src = './aqi_icon/ic-face-red.svg';
+          aqiImageElement.alt = 'red';
+        }
+
+      })
+      .catch(error => console.error(error));
+  </script>
+
+
+
+</body></html>
